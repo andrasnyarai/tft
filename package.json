@@ -1,0 +1,9 @@
+{
+  "name": "tft",
+  "version": "1.0.0",
+  "description": "Personal Mnemonic Temple",
+  "main": "index.js",
+  "repository": "git@github.com:andrasnyarai/tft.git",
+  "author": "Nyárai András <andrasnyarai@gmail.com>",
+  "license": "MIT"
+}

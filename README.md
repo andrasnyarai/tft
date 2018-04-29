@@ -13,4 +13,5 @@ desired tech:
 	- paint Chart.js
 	- connect GraphQL
 	- watch Jest
+	- wrap Nuxt
 
