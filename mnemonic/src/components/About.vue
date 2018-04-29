@@ -4,27 +4,32 @@
     <div class="about">
         <h1>/me</h1>
         <p>not yet a describe</p>
-      <line-chart v-if="loaded"
-                  :chart-labels="chartLabels"
-                  :chart-data="languageChartData" />
+      <div class="chart-container">
+        <doughnut-chart
+          v-if="loaded"
+          :chart-labels="chartLabels"
+          :chart-data="languageChartData"
+          :chart-colors="colors"/>
+      </div>
     </div>
 </template>
 
 <script>
-import LineChart from './LineChart';
+import DoughnutChart from './DoughnutChart';
 
 export default {
-  components: { LineChart },
+  components: { DoughnutChart },
   data() {
     return {
       loaded: false,
       chartLabels: [],
       languageChartData: [],
+      colors: [],
       sumLang: {},
     };
   },
   methods: {
-    async fetchStatistics() {
+    fetchStatistics() {
       fetch('https://api.github.com/users/andrasnyarai/repos', { method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json',
@@ -53,13 +58,14 @@ export default {
         }) })
         .then(res => res.json())
         .then((languageStatistics) => {
-          const repoLanguages = Object.entries(languageStatistics)
+          const repoLanguages = Object.entries(languageStatistics);
           repoLanguages.reduce((acc, oneLanguage) => {
             if (!acc[oneLanguage[0]]) {
               acc[oneLanguage[0]] = oneLanguage[1];
             } else {
               acc[oneLanguage[0]] += oneLanguage[1];
             }
+            this.colors.push(`#${(Math.random() * 0xFFFFFF << 0).toString(16)}`);
             return acc;
           }, this.sumLang);
         })
@@ -72,3 +78,9 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+  .chart-container {
+    width: 60%;
+  }
+</style>
