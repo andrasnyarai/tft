@@ -7,9 +7,6 @@
       <line-chart v-if="loaded"
                   :chart-labels="chartLabels"
                   :chart-data="languageChartData" />
-      <div v-for="lang in lrepr">
-        {{ lang }}
-      </div>
     </div>
 </template>
 
@@ -23,7 +20,7 @@ export default {
       loaded: false,
       chartLabels: [],
       languageChartData: [],
-      lrepr: [],
+      sumLang: {},
     };
   },
   methods: {
@@ -34,46 +31,44 @@ export default {
         }) })
         .then(res => res.json())
         .then((statistics) => {
-          const promisesPending = [];
-          statistics.forEach((repo) => {
-            promisesPending.push(this.fetchLanguagesData(repo.languages_url));
-            // console.log(this.languageChartData);
-            // console.log(this.chartLabels);
-          });
-          return Promise.all(promisesPending);
+          const languageUrls = [];
+          const promises = [];
+          statistics.forEach(repo => languageUrls.push(repo.languages_url));
+          languageUrls.forEach(lang => promises.push(this.fetchLanguagesData(lang)));
+          return Promise.all(promises);
         })
         .catch(error => console.error('Error:', error))
-        .then(response => console.log('ALL is WELL'));
+        .then(() => {
+          Object.entries(this.sumLang).forEach((sumPerLang) => {
+            this.chartLabels.push(sumPerLang[0]);
+            this.languageChartData.push(sumPerLang[1]);
+          });
+          this.loaded = true;
+        });
     },
     fetchLanguagesData(languageUrl) {
-      fetch(languageUrl, { method: 'GET',
+      return fetch(languageUrl, { method: 'GET',
         headers: new Headers({
           'Content-Type': 'application/json',
         }) })
         .then(res => res.json())
         .then((languageStatistics) => {
-          this.lrepr.push(languageStatistics);
-          Object.keys(languageStatistics).forEach((value) => {
-            // if (!this.chartLabels.contains(value)) {
-            this.chartLabels.push(value);
-            // }
-            // this.chartLabels.push(value);
-          });
-          Object.values(languageStatistics).forEach((value) => {
-            this.languageChartData.push(value);
-          });
+          const repoLanguages = Object.entries(languageStatistics)
+          repoLanguages.reduce((acc, oneLanguage) => {
+            if (!acc[oneLanguage[0]]) {
+              acc[oneLanguage[0]] = oneLanguage[1];
+            } else {
+              acc[oneLanguage[0]] += oneLanguage[1];
+            }
+            return acc;
+          }, this.sumLang);
         })
         .catch(error => console.error('Error:', error))
-        .then(response => console.log('Success:', response));
+        .then(() => console.log('successfully fetched data from one repo'));
     },
   },
   mounted() {
     this.fetchStatistics();
-    setTimeout(()=> {
-          this.loaded = true;
-
-    }, 2000)
-    // console.log('this', this.chartLabels)
   },
 };
 </script>
