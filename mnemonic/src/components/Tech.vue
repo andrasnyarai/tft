@@ -1,7 +1,8 @@
 <template>
     <div class="tech">
         <div v-for="tech in techs">
-            {{ tech.icon }}
+            <!--<p>{{ tech.text }}<p/>-->
+          <div v-bind:style="{ backgroundImage: `url(${tech.path})` }" />
         </div>
     </div>
 </template>
@@ -22,43 +23,64 @@ let iconRef;
 
 const db = firebase.firestore();
 
-const docRef = db.collection('icons').doc('Iw5G9ewKHEZ37qmIomaR');
 
-docRef.get().then((doc) => {
-  if (doc.exists) {
-    console.log('Document data:', doc.data());
-    iconRef = doc.data().paths;
-    console.log(iconRef);
-    iconRef.forEach((imgName) => {
-      const tangRef = storageRef.child(`icons/${imgName}`);
-      firebase.auth().signInAnonymously().then(() => {
-        tangRef.getDownloadURL().then((url) => {
-          console.log(url);
-        });
-      });
-    });
-  } else {
-    // doc.data() will be undefined in this case
-    console.log('No such document!');
-  }
-}).catch((error) => {
-  console.log('Error getting document:', error);
-});
 export default {
   name: 'Tech',
   data() {
     return {
-      techs: [
-        { icon: 'aaa' },
-        { icon: 'bbb' },
-        { icon: 'bbb' },
-        { icon: 'bbb' },
-        { icon: 'ggg' },
-        { icon: 'fff' },
-      ],
+      techs: [],
     };
   },
-  methods: {},
-  mounted() {},
+  methods: {
+    firebaseInit() {
+      const docRef = db.collection('icons').doc('Iw5G9ewKHEZ37qmIomaR');
+
+      docRef.get().then((doc) => {
+        if (doc.exists) {
+          console.log('Document data:', doc.data());
+          iconRef = doc.data().paths;
+          console.log(iconRef);
+          iconRef.forEach((techDataObject) => {
+            const tangRef = storageRef.child(`icons/${techDataObject.picture}`);
+            firebase.auth().signInAnonymously().then(() => {
+              tangRef.getDownloadURL().then((url) => {
+                console.log(url);
+                this.techs.push({ path: url, text: techDataObject.picture.split('.')[0] });
+              });
+            });
+          });
+        } else {
+          // doc.data() will be undefined in this case
+          console.log('No such document!');
+        }
+      }).catch((error) => {
+        console.log('Error getting document:', error);
+      });
+    },
+  },
+  mounted() {
+    this.firebaseInit();
+  },
 };
 </script>
+
+<style scoped>
+  .tech {
+    margin: 10%;
+  }
+  .tech div {
+    margin: 5px;
+    display: inline-block;
+  }
+  .tech > div > div {
+    width: 150px;
+    height: 150px;
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+  }
+  img {
+    width: 150px;
+    max-height: 150px;
+  }
+</style>

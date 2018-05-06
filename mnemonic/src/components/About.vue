@@ -63,7 +63,7 @@ export default {
             } else {
               acc[oneLanguage[0]] += oneLanguage[1];
             }
-            this.colors.push(`#${(Math.random() * 0xFFFFFF << 0).toString(16)}`);
+            this.colors.push(`#${(`${Math.random().toString(16)}000000`).substring(2, 8)}`);
             return acc;
           }, this.sumLang);
         })
