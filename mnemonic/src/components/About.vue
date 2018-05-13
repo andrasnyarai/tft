@@ -4,10 +4,10 @@
         <p>not yet a describe</p>
       <div class="chart-container">
         <doughnut-chart
-          v-if="loaded"
-          :chart-labels="chartLabels"
-          :chart-data="languageChartData"
-          :chart-colors="colors"/>
+          v-if="this.$parent.loaded"
+          :chart-labels="this.$parent.chartLabels"
+          :chart-data="this.$parent.languageChartData"
+          :chart-colors="this.$parent.colors"/>
       </div>
     </div>
 </template>
@@ -18,67 +18,21 @@ import DoughnutChart from './DoughnutChart';
 export default {
   components: { DoughnutChart },
   data() {
-    return {
-      loaded: false,
-      chartLabels: [],
-      languageChartData: [],
-      colors: [],
-      sumLang: {},
-    };
+    return {};
   },
-  methods: {
-    fetchStatistics() {
-      fetch('https://api.github.com/users/andrasnyarai/repos', { method: 'GET',
-        headers: new Headers({
-          'Content-Type': 'application/json',
-        }) })
-        .then(res => res.json())
-        .then((statistics) => {
-          const languageUrls = [];
-          const promises = [];
-          statistics.forEach(repo => languageUrls.push(repo.languages_url));
-          languageUrls.forEach(lang => promises.push(this.fetchLanguagesData(lang)));
-          return Promise.all(promises);
-        })
-        .catch(error => console.error('Error:', error))
-        .then(() => {
-          Object.entries(this.sumLang).forEach((sumPerLang) => {
-            this.chartLabels.push(sumPerLang[0]);
-            this.languageChartData.push(sumPerLang[1]);
-          });
-          this.loaded = true;
-        });
-    },
-    fetchLanguagesData(languageUrl) {
-      return fetch(languageUrl, { method: 'GET',
-        headers: new Headers({
-          'Content-Type': 'application/json',
-        }) })
-        .then(res => res.json())
-        .then((languageStatistics) => {
-          const repoLanguages = Object.entries(languageStatistics);
-          repoLanguages.reduce((acc, oneLanguage) => {
-            if (!acc[oneLanguage[0]]) {
-              acc[oneLanguage[0]] = oneLanguage[1];
-            } else {
-              acc[oneLanguage[0]] += oneLanguage[1];
-            }
-            this.colors.push(`#${(`${Math.random().toString(16)}000000`).substring(2, 8)}`);
-            return acc;
-          }, this.sumLang);
-        })
-        .catch(error => console.error('Error:', error))
-        .then(() => console.log('successfully fetched data from one repo'));
-    },
-  },
-  mounted() {
-    this.fetchStatistics();
-  },
+  methods: {},
+  mounted() {},
 };
 </script>
 
 <style scoped>
   .chart-container {
     width: 60%;
+  }
+
+  @media (max-width:450px) {
+    .chart-container {
+      width: 90%;
+    }
   }
 </style>

@@ -17,4 +17,4 @@ selenium-debug.log
 *.sln
 
 # firebase config
-firebase.json
+firebaseConfig.json

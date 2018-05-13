@@ -38,7 +38,6 @@ export default {
       datasets: [
         {
           pointBackgroundColor: 'white',
-          pointBorderColor: '#249EBF',
           backgroundColor: this.chartColors,
           borderColor: 'black',
           borderWidth: 2,
