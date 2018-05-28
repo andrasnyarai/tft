@@ -1,23 +1,20 @@
-<!--Math.floor(index / 4) * 15-->
 <template>
   <div class="wrapper">
     <div v-if="modalActive" class="modal">
       <p>
-      <a>[./node_modules/css-loader/index.js!./node_modules/sass-loader/lib/loader.js!./src/clien</a>
-      <a>[./node_modules/css-loader/index.js!./node_modules/sass-loader/lib/loader.js!./src/clien</a>
-      <a>[./node_modules/css-loader/index.js!./node_modules/sass-loader/lib/loader.js!./src/clien</a>
-      <a>[./node_modules/css-loader/index.js!./node_modules/sass-loader/lib/loader.js!./src/clien</a>
+        <a>[./node_modules/css-loader/index.js!./node_modules/sass-loader/lib/loader.js!./src/clien</a>
+        <a>[./node_modules/css-loader/index.js!./node_modules/sass-loader/lib/loader.js!./src/clien</a>
+        <a>[./node_modules/css-loader/index.js!./node_modules/sass-loader/lib/loader.js!./src/clien</a>
+        <a>[./node_modules/css-loader/index.js!./node_modules/sass-loader/lib/loader.js!./src/clien</a>
       </p>
     </div>
-    <div class= "tech">
-      <!--<span class="modal"></span>-->
-        <div v-for="(tech, index) in this.$parent.techs">
-          <div v-bind:style="{ backgroundImage: `url(${tech.path})`,
-          transform: `translateY(${tech.offsetY * 150 + 100 + (Math.floor(index / 4) * 15)}px) translateX(${tech.offsetX * 150 + 100}px)` }"
-               v-bind:class="{ enlarge: tech.activeEl }"
-                v-on:click="enlargeElement(tech, index)"/>
-            <p>{{ tech.text }}<p/>
-              <!--<p>tech.text</p>-->
+    <div class= "tech" v-if="this.$parent.loadTechIndicator">
+      <div v-for="(tech, index) in this.$parent.techs">
+        <div v-bind:style="{ backgroundImage: `url(${tech.path})`,
+        transform: `translateY(${tech.offsetY * 50 + 100 + (Math.floor(index / 4) * 15)}px) translateX(${tech.offsetX * 70 + 400 + (Math.floor(index / 4) * 5)}px)` }"
+              v-bind:class="{ enlarge: tech.activeEl }"
+              v-on:click="enlargeElement(tech, index)"/>
+          <p>{{ tech.text }}<p/>
         </div>
     </div>
   </div>
@@ -26,129 +23,58 @@
 <script>
 import { tween, styler, easing, listen } from 'popmotion';
 
-function disable_scroll() {
-  document.ontouchmove = function(e){
-    e.preventDefault();
-  }
-}
-
-function enable_scroll() {
-  document.ontouchmove = function(e){
-    return true;
-  }
-}
-
-function disableScrolling(){
-  var x=window.scrollX;
-  var y=window.scrollY;
-  window.onscroll=function(){window.scrollTo(x, y);};
-}
-
-function enableScrolling(){
-  window.onscroll=function(){};
-}
-
-let elStyler;
-let el;
-// listen(document, 'scroll')
-//   .start(() => {
-//     console.log(window.scrollY)
-//     // el.classList.add('fixed');
-//
-//
-//     tween({
-//       to: { y: window.scrollY },
-//       ease: easing.easeInOut,
-//       // flip: Infinity,
-//       // duration: 0,
-//     }).start(elStyler.set);
-//
-//
-//   });
-//
-// listen(document, 'touchmove')
-//   .start(() => {
-//     console.log(window.scrollY)
-//     // el.classList.add('fixed');
-//
-//
-//     tween({
-//       to: { y: window.scrollY },
-//       ease: easing.easeInOut,
-//       // flip: Infinity,
-//       // duration: 0,
-//     }).start(elStyler.set);
-//
-//
-//   });
-
-
-
 export default {
   name: 'Tech',
   data() {
     return {
       modalActive: false,
       enlargeActive: false,
+      allIconElements: undefined,
+      initValue: true,
+      previous: null,
     };
   },
   components: {
   },
   methods: {
     enlargeElement(tech, index) {
-      // disable_scroll()
-      // disableScrolling()
-      console.log(index)
+      if (this.$parent.loadTechIndicator && this.initValue) {
+        this.allIconElements = document.querySelectorAll('.tech > div')
+        this.initValue = false
+      }
       index += 1;
-      // this.$parent.techs.forEach(singleTech => singleTech.activeEl = false);
-      // this.enlargeActive = !this.enlargeActive;
-      // tech.activeEl = true;
-      const backgroundNoise = document.querySelectorAll('.tech > div');
-      backgroundNoise.forEach((div, i) => i + 1 === index ? null : div.classList.toggle('blur'))
+      if (this.previous) {
+        this.previous.element.classList.remove('enlarge');
+        this.previous.element.children[0].style.transform = `${this.previous.initialState}`;
+        console.log(this.previous)
+      }
 
+
+      this.allIconElements.forEach((div, i) => i + 1 === index ? div.classList.remove('blur') : div.classList.add('blur'));
       const focusedElement = document.querySelector(`.tech > div:nth-of-type(${index})`);
+      this.previous = {};
+      this.previous.element = focusedElement;
+      this.previous.initialState = window.getComputedStyle(focusedElement.children[0]).transform
       focusedElement.classList.add('enlarge')
       const details = document.querySelector(`.tech > div:nth-of-type(${index}) p`);
       details.classList.toggle('visible');
-      console.log(focusedElement)
       const focusStyler = styler(focusedElement.children[0]);
-      // elStyler = focusStyler;
-
-      console.log(window.screenLeft)
-
-      var curTransform = new WebKitCSSMatrix(window.getComputedStyle(focusedElement).webkitTransform);
-      console.log(focusedElement.offsetTop)
-      console.log(focusedElement.offsetLeft + curTransform.m41); //real offset left
-      let originalPositionFromTop = focusedElement.offsetTop + curTransform.m42;
-      let originalPositionFromLeft = focusedElement.offsetLeft + curTransform.m41;
-      console.log('node: ', originalPositionFromTop, originalPositionFromLeft); //real offset top
-      console.log('scroll: ', window.scrollY)
-      el = focusedElement
-      let list = window.getComputedStyle(focusedElement.children[0]).transform.replace(')','').split(',')
-      console.log(list)
+      const transformMatrix = window.getComputedStyle(focusedElement.children[0]).transform.replace(')','').split(',')
 
       tween({
-        from: { x: 0, y: 0, scale: 1, position: 'fixed' },
-        to: { x: 0, y: list[5] - (list[5] - window.scrollY), scale: 2, position: 'fixed' },
+        // from: { x: 0, y: 0, scale: 1 },
+        // to: { x: transformMatrix[4] + .1, y: transformMatrix[5] - (transformMatrix[5] - window.scrollY), scale: 4 },
         ease: easing.easeInOut,
-        // flip: Infinity,
         duration: 0,
       }).start(focusStyler.set);
-      elStyler = focusStyler;
-      // el = focusedElement.children[0]
-
-      // setTimeout(() => {
-      //   focusedElement.classList.add('fixed')
-      // },3500)
-
-
 
       this.modalActive = true;
-      // Modal.isActive = true;
-
-
-      // tween({ to: 300, duration: 500 })
-      //   .start(styler(focusedElement).set('x'));
+      setTimeout(() => focusedElement.children[0].style.transform = 'translate(100px , 500px) scale(5)', 1000);
+      // setTimeout(() => {focusedElement.children[0].style.transform = `translateY(${window.scrollY + 150}px)`}, 1000);
+      setTimeout(() => {
+        // focusedElement.children[0].classList.add('fixed');
+        // focusedElement.children[0].style.transform = `translateY(${0}px)`
+      }, 2000);
     },
   },
 };
@@ -167,8 +93,8 @@ export default {
     transition: 1s ease;
   }
   .tech > div > div {
-    width: 150px;
-    height: 150px;
+    width: 50px;
+    height: 50px;
     background-position: center;
     background-size: contain;
     background-repeat: no-repeat;
@@ -180,16 +106,16 @@ export default {
     display: block !important;
   }
   img {
-    width: 150px;
-    max-height: 150px;
+    width: 50px;
+    max-height: 50px;
   }
   .blur {
-    filter: blur(20px);
+    /*filter: blur(2px);*/
     opacity: .2;
   }
   .enlarge {
     z-index: 1;
-    position: fixed;
+    /*position: fixed;*/
   }
   div.enlarge > div {
     /*position: fixed;*/
@@ -198,13 +124,15 @@ export default {
 
   }
   div.fixed {
-    position: fixed;
+    /*transform: translate(0);*/
+    position: sticky !important;
 
   }
   .modal {
     width: 100%;
     height: 100%;
-    position: absolute;
+    position: fixed;
+
   }
   .modal p {
     width: 80%;

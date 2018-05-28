@@ -4,7 +4,7 @@
 
     <nav>
       <router-link to="/">About</router-link>
-      <router-link to="/tech">Tech</router-link>
+      <router-link to="{path: `/tech`, props: {loadTechIndicator: loadTechIndicator}}">Tech</router-link>
     </nav>
     <router-view />
   </div>
@@ -13,6 +13,7 @@
 <script>
 import firebase from 'firebase';
 import About from './components/About';
+import Tech from './components/Tech';
 
 // Required for side-effects
 require('firebase/firestore');
@@ -42,10 +43,13 @@ export default {
       colors: [],
       sumLang: {},
       counter: -1,
+      loadTechIndicator: false,
+      iconsToLoad: 0,
     };
   },
   components: {
     About,
+    Tech,
   },
   methods: {
     firebaseInit() {
@@ -55,18 +59,20 @@ export default {
         if (doc.exists) {
           console.log('Document data:', doc.data());
           iconRef = doc.data().paths;
+          this.iconsToLoad = iconRef.length;
           console.log(iconRef);
           iconRef.forEach((techDataObject) => {
             const tangRef = storageRef.child(`icons/${techDataObject.picture}`);
             firebase.auth().signInAnonymously().then(() => {
               tangRef.getDownloadURL().then((url) => {
-                console.log(url);
+                // console.log(url);
                 this.counter += 1;
                 this.techs.push({ path: url, text: techDataObject.picture.split('.')[0], activeEl: false, offsetY: Math.floor(this.techs.length / 4), offsetX: this.counter });
                 if (this.counter === 3) {
                   this.counter = -1;
                 }
-                console.log(this.techs)
+                this.techs.length === this.iconsToLoad ? this.loadTechIndicator = true : null;
+                // console.log(this.techs)
               });
             });
           });
